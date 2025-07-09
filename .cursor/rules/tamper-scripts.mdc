@@ -1,0 +1,35 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Tampermonkey Script Generation Rule
+
+This rule lets you quickly scaffold a new Tampermonkey userscript and its remote loader by asking in natural language.
+
+## Usage
+
+Simply ask something like:
+
+- "create a new tamper monkey script for <your description>"
+- "generate tampermonkey script to <your description> matching <optional URL pattern>"
+
+The exact wording is flexible—Cursor will figure out your intent.
+
+## What it does
+
+- Creates a stub userscript at `src/<slug>.js` with the standard Tampermonkey header.
+- Creates a remote loader `<slug>-remote.js` that uses `@require` to point to the stub in `src/`.
+- `<slug>` is automatically derived from your description (lowercased, spaces and symbols → hyphens).
+
+## References
+
+Look at existing scripts in `src/` (e.g., `buildkite-first-run-report.js`) for examples of headers and formatting.
+
+## Workflow
+
+1. Edit your logic in `src/<slug>.js`.
+2. Load `<slug>-remote.js` in Tampermonkey for live-reload development.
+
+*This documentation lives in `.cursor/rules/tamper-scripts.mdc`.*
+
