@@ -28,7 +28,7 @@ Available scripts:
 
 ## Usage
 
-1. Install the Tampermonkey extension in your browser.
+1. Install the [Tampermonkey][tampermonkey-chrome-store] extension in your browser.
 2. Open the Tampermonkey dashboard and click **Add a new script**.
    ![Add New Script](assets/images/tamper-monkey-dashboard-add-new-script.png)
 3. Replace the default template with your remote loader URL. For example:
@@ -56,4 +56,6 @@ Available scripts:
 ## Contributing
 
 Contributions are welcome! Feel free to open issues, feature requests, or pull requests.
+
+[tampermonkey-chrome-store]: https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo
 
