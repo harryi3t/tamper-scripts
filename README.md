@@ -7,7 +7,7 @@ A collection of Tampermonkey userscripts and remote loaders for customizing and 
 This repository contains a set of Tampermonkey userscripts to enhance various web-based tooling. Each script has two components:
 
 1. `src/<slug>.js` – The actual userscript code.
-2. `<slug>-remote.js` – A remote loader that `@require`s the script from `src/` for live-reload development.
+2. `<slug>-remote.js` – A remote loader that `@require`s the script directly from Github or from local file system during development.
 
 Available scripts:
 
@@ -21,20 +21,39 @@ Available scripts:
 .
 ├── src
 │   ├── some-script.js
-│   some-script-remote.js
+├── remote
+│   ├── some-script-remote.js
+└── README.md
 ```
 
 ## Usage
 
-1. Install Tampermonkey in your browser.
-2. Create a new script in Tampermonkey and replace its content with the remote loader file for your desired script.
-3. Refresh the target page to see the script in action. Any edits to `src/<slug>.js` will be reflected on reload.
+1. Install the Tampermonkey extension in your browser.
+2. Open the Tampermonkey dashboard and click **Add a new script**.
+   ![Add New Script](assets/images/tamper-monkey-dashboard-add-new-script.png)
+3. Replace the default template with your remote loader URL. For example:
+   ![Paste Remote Script](assets/images/tamper-monkey-paste-remote-script.png)
+4. Save the script. It will automatically run on matching pages the next time you visit them.
 
 ## Development
 
 - Modify the code in `src/<slug>.js`.
-- Reload the script in Tampermonkey to apply changes immediately.
+- While developing, update the `@require` in your Tampermonkey script to point to your local file.
+
+   ```js
+   // @require file:///<path-to-tamper-scripts>/remote/<slug>-remote.js
+   ```
+
+## Publishing
+
+1. Push your changes to GitHub.
+2. Ensure that the `@require` in your Tampermonkey script points to the raw GitHub URL:
+
+   ```js
+   // @require https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/remote/<slug>-remote.js
+   ```
 
 ## Contributing
 
 Contributions are welcome! Feel free to open issues, feature requests, or pull requests.
+

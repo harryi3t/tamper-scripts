@@ -5,5 +5,5 @@
 // @description  Add a button to copy on-call info from Sentry issue pages
 // @match        https://people-center-inc.sentry.io/issues/*
 // @grant        none
-// @require      file:///Users/harendra/work/playground/scripts/tamper-scripts/src/sentry-copy-on-call.js
+// @require      https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/remote/sentry-copy-on-call.js
 // ==/UserScript==
