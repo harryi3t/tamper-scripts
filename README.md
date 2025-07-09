@@ -41,7 +41,7 @@ Available scripts:
 - While developing, update the `@require` in your Tampermonkey script to point to your local file.
 
    ```js
-   // @require file:///<path-to-tamper-scripts>/remote/<slug>-remote.js
+   // @require file:///<path-to-tamper-scripts>/src/<slug>.js
    ```
 
 ## Publishing
@@ -50,7 +50,7 @@ Available scripts:
 2. Ensure that the `@require` in your Tampermonkey script points to the raw GitHub URL:
 
    ```js
-   // @require https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/remote/<slug>-remote.js
+   // @require https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/src/<slug>.js
    ```
 
 ## Contributing

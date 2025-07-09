@@ -5,5 +5,5 @@
 // @description  Add "first run report" links to Frontend-CI Report comments on GitHub PRs
 // @match        https://github.com/Rippling/rippling-webapp/pull/*
 // @grant        none
-// @require      https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/remote/github-pr-first-run-report.js
+// @require      https://raw.githubusercontent.com/harryi3t/tamper-scripts/refs/heads/main/src/github-pr-first-run-report.js
 // ==/UserScript==
