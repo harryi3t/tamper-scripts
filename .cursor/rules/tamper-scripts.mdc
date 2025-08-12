@@ -21,15 +21,24 @@ The exact wording is flexible—Cursor will figure out your intent.
 - Creates a stub userscript at `src/<slug>.js` with the standard Tampermonkey header.
 - Creates a remote loader `<slug>-remote.js` that uses `@require` to point to the stub in `src/`.
 - `<slug>` is automatically derived from your description (lowercased, spaces and symbols → hyphens).
+- **For new scripts**: The remote loader uses a local `file://` path for development.
+- **For published scripts**: The remote loader uses the GitHub raw URL.
 
 ## References
 
 Look at existing scripts in `src/` (e.g., `buildkite-first-run-report.js`) for examples of headers and formatting.
 
-## Workflow
+## Development Workflow
 
 1. Edit your logic in `src/<slug>.js`.
 2. Load `<slug>-remote.js` in Tampermonkey for live-reload development.
+3. **Important**: For new scripts, the remote loader uses `file:///<absolute-path>/src/<slug>.js` for local development.
+4. After publishing to GitHub, update the `@require` to use the GitHub raw URL.
+
+## File Paths
+
+- **Development (new scripts)**: `file:///<workspace-path>/src/<slug>.js`
+- **Production (published)**: `https://raw.githubusercontent.com/user/repo/main/src/<slug>.js`
 
 *This documentation lives in `.cursor/rules/tamper-scripts.mdc`.*
 
