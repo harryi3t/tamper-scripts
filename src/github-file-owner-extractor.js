@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  Extract and log file owner information from GitHub PR file view pages
-// @match        https://github.com/*/pull/*/files*
+// @match        https://github.com/*/pull/*/files
 // @grant        none
 // ==/UserScript==
 
