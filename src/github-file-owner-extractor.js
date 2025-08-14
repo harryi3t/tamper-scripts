@@ -305,11 +305,163 @@
         renderOwnerFilters(container, anchor, filterState.lastOwnerToFilesMap);
     }
 
+    // ---------- UI: Toggle collapse/expand all files in PR diff ----------
+    function getExpandedFileToggleButtons() {
+        // Expanded state has the per-file button labeled "Collapse file: <path>"
+        return Array.from(document.querySelectorAll('button[aria-label^="Collapse file:"]'));
+    }
+
+    function getCollapsedFileToggleButtons() {
+        // Collapsed state has the per-file button labeled "Expand file: <path>"
+        return Array.from(document.querySelectorAll('button[aria-label^="Expand file:"]'));
+    }
+
+    function areAllFilesCollapsed() {
+        const expanded = getExpandedFileToggleButtons();
+        const collapsed = getCollapsedFileToggleButtons();
+        // All collapsed if there are zero expanded and at least one collapsed button present
+        return expanded.length === 0 && collapsed.length > 0;
+    }
+
+    function createChevronSVG(direction) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('focusable', 'false');
+        svg.setAttribute('class', `octicon ${direction === 'right' ? 'octicon-chevron-right' : 'octicon-chevron-down'}`);
+        svg.setAttribute('viewBox', '0 0 16 16');
+        svg.setAttribute('width', '16');
+        svg.setAttribute('height', '16');
+        svg.setAttribute('fill', 'currentColor');
+        svg.setAttribute('display', 'inline-block');
+        svg.setAttribute('overflow', 'visible');
+        svg.setAttribute('style', 'vertical-align: text-bottom;');
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        if (direction === 'right') {
+            path.setAttribute('d', 'M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z');
+        } else {
+            path.setAttribute('d', 'M12.78 5.22a.749.749 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.06 0L3.22 6.28a.749.749 0 1 1 1.06-1.06L8 8.939l3.72-3.719a.749.749 0 0 1 1.06 0Z');
+        }
+        svg.appendChild(path);
+        return svg;
+    }
+
+    function setToggleAllButtonContent(buttonEl, label, direction) {
+        if (!buttonEl) return;
+        // Build GitHub-like button content with leading icon and text
+        const content = document.createElement('span');
+        content.setAttribute('data-component', 'buttonContent');
+        content.setAttribute('data-align', 'start');
+        content.className = 'prc-Button-ButtonContent-HKbr-';
+
+        const leading = document.createElement('span');
+        leading.setAttribute('data-component', 'leadingVisual');
+        leading.className = 'prc-Button-Visual-2epfX prc-Button-VisualWrap-Db-eB';
+        leading.appendChild(createChevronSVG(direction));
+
+        const text = document.createElement('span');
+        text.setAttribute('data-component', 'text');
+        text.className = 'prc-Button-Label-pTQ3x';
+        text.textContent = label;
+
+        content.appendChild(leading);
+        content.appendChild(text);
+
+        buttonEl.innerHTML = '';
+        buttonEl.appendChild(content);
+    }
+
+    function updateToggleAllButtonVisual(buttonEl) {
+        if (!buttonEl) return;
+        // Determine state: if any expanded, action is to collapse all; else expand all
+        const hasAnyExpanded = getExpandedFileToggleButtons().length > 0;
+        const action = hasAnyExpanded ? 'collapse' : 'expand';
+        const title = action === 'collapse' ? 'Collapse all files' : 'Expand all files';
+        const label = action === 'collapse' ? 'Collapse' : 'Expand';
+        const direction = action === 'collapse' ? 'down' : 'right';
+
+        buttonEl.setAttribute('aria-label', title);
+        buttonEl.setAttribute('title', title);
+        setToggleAllButtonContent(buttonEl, label, direction);
+    }
+
+    function performToggleAllFiles() {
+        const expanded = getExpandedFileToggleButtons();
+        const collapsed = getCollapsedFileToggleButtons();
+        if (expanded.length > 0) {
+            debug(`Collapsing ${expanded.length} files`);
+            expanded.forEach(btn => btn.click());
+        } else if (collapsed.length > 0) {
+            debug(`Expanding ${collapsed.length} files`);
+            collapsed.forEach(btn => btn.click());
+        } else {
+            debug('No per-file expand/collapse buttons found');
+        }
+        // After DOM updates settle, refresh the icon/tooltip
+        setTimeout(() => {
+            document.querySelectorAll('[data-tm-toggle-all-files="true"]').forEach(el => updateToggleAllButtonVisual(el));
+        }, 200);
+    }
+
+    function ensureToggleAllButtonInToolbar(toolbarRoot) {
+        if (!toolbarRoot) return;
+        // Find the "All changes" button within this toolbar root
+        const allChangeButtons = Array.from(toolbarRoot.querySelectorAll('button'))
+            .filter(b => (b.textContent || '').trim() === 'All changes');
+        if (allChangeButtons.length === 0) {
+            return;
+        }
+
+        const anchorButton = allChangeButtons[0];
+        // Avoid duplicating in the same container
+        const existing = anchorButton.parentElement && anchorButton.parentElement.querySelector('[data-tm-toggle-all-files="true"]');
+        if (existing) {
+            updateToggleAllButtonVisual(existing);
+            return;
+        }
+
+        const btn = document.createElement('button');
+        // Match bordered button styling similar to "All changes" / "Comments"
+        btn.className = 'prc-Button-ButtonBase-c50BI flex-shrink-0';
+        btn.type = 'button';
+        btn.setAttribute('data-tm-toggle-all-files', 'true');
+        btn.setAttribute('data-loading', 'false');
+        btn.setAttribute('data-size', 'small');
+        btn.setAttribute('data-variant', 'default');
+        // Add some spacing from the previous button
+        btn.style.marginLeft = '6px';
+        updateToggleAllButtonVisual(btn);
+
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            performToggleAllFiles();
+        });
+
+        // Ensure the parent container lays out children horizontally
+        const parent = anchorButton.parentElement;
+        if (parent && parent.className && parent.className.includes('PullRequestFilesToolbar-module__hide-when-stuck')) {
+            parent.style.display = 'flex';
+        }
+
+        // Place right after the anchor to sit adjacent in the same row
+        anchorButton.insertAdjacentElement('afterend', btn);
+        debug('Injected Toggle All Files button');
+    }
+
+    function ensureToggleAllButtons() {
+        // The toolbar appears as a section with class containing PullRequestFilesToolbar-module__toolbar
+        const toolbars = Array.from(document.querySelectorAll('section[class*="PullRequestFilesToolbar-module__toolbar"]'));
+        if (toolbars.length === 0) return;
+        toolbars.forEach(tb => ensureToggleAllButtonInToolbar(tb));
+    }
+
     function observePageChanges() {
         // Create a MutationObserver to watch for dynamically loaded content
         const observer = new MutationObserver((mutations) => {
             let shouldExtract = false;
             let shouldRenderFilters = false;
+            let shouldEnsureToggle = false;
 
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -324,6 +476,14 @@
                             // Also check if filter menu appeared
                             if (!shouldRenderFilters && /Only files owned by you/i.test(node.textContent || '')) {
                                 shouldRenderFilters = true;
+                            }
+                            // Check for toolbar or file toggle buttons to manage our toggle-all button
+                            if (!shouldEnsureToggle) {
+                                const hasToolbar = node.matches && (node.matches('section[class*="PullRequestFilesToolbar-module__toolbar"]') || !!node.querySelector('section[class*="PullRequestFilesToolbar-module__toolbar"]'));
+                                const hasFileToggles = node.querySelectorAll && (node.querySelectorAll('button[aria-label^="Collapse file:"], button[aria-label^="Expand file:"]').length > 0);
+                                if (hasToolbar || hasFileToggles) {
+                                    shouldEnsureToggle = true;
+                                }
                             }
                         }
                     });
@@ -340,6 +500,13 @@
             if (shouldRenderFilters) {
                 // Attempt to render owner filters when the filter menu is opened/changed
                 setTimeout(tryRenderOwnerFilters, 100);
+            }
+
+            if (shouldEnsureToggle) {
+                setTimeout(() => {
+                    ensureToggleAllButtons();
+                    document.querySelectorAll('[data-tm-toggle-all-files="true"]').forEach(el => updateToggleAllButtonVisual(el));
+                }, 100);
             }
         });
 
@@ -359,6 +526,8 @@
         // Initial extraction
         setTimeout(() => {
             extractFileOwners();
+            ensureToggleAllButtons();
+            document.querySelectorAll('[data-tm-toggle-all-files="true"]').forEach(el => updateToggleAllButtonVisual(el));
         }, 1000); // Wait a bit for page to load
 
         // Set up observer for dynamic content
